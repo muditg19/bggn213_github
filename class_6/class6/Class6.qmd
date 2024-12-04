@@ -1,0 +1,86 @@
+---
+title: "Class 6: R functions"
+author: "Mudit"
+format: pdf
+---
+
+My first function 
+
+```{r}
+add <- function(x, y=1, z = 0){
+  x + y
+}
+```
+
+Can I just use it?
+
+```{r}
+add(1, 1)
+add(x=1, y=100)
+add(c(100, 1, 100), 1)
+```
+
+```{r}
+add(10)
+add(1, 1, 1)
+```
+
+
+```{r}
+GENERATE_DNA <- function(l = 1){
+  
+  
+  bases <- c('A', 'T', 'G', 'C')
+  sequence1 <- sample(bases, l, replace = TRUE)
+  #paste0(sample(bases, l, replace = TRUE), collapse = "")
+  sequence1 <- paste0(sample(bases, l, replace = TRUE), collapse = "")
+  return(sequence1)
+  
+}
+```
+
+```{r}
+GENERATE_DNA(100)
+```
+
+
+```{r}
+GENERATE_PROTEIN <- function(l = 1){
+  
+  amino <- unique(bio3d::aa.table$aa1)
+  bases <- c('A', 'T', 'G', 'C')
+  #sample(bases, l, replace = TRUE)
+  #paste0(sample(bases, l, replace = TRUE), collapse = "")
+  sequence1 <- paste0(sample(amino, l, replace = TRUE), collapse = "")
+  return(sequence1)
+  
+}
+```
+
+```{r}
+GENERATE_DNA(100)
+```
+```{r}
+unique(bio3d::aa.table$aa1)[1:20]
+View(bio3d::aa.table)
+```
+
+Generate random protein sequences of length 6 to 12
+```{r}
+answer<-sapply(6:12, GENERATE_PROTEIN)
+cat(paste(">id.", 6:12, "\n", answer, sep=''), sep="\n")
+```
+```{r}
+#grade() <- function(x = c(1, 1, 1, 1)){
+#  x<-sort(x)
+  
+#}
+```
+
+```{r}
+df <- read.csv("student_homework.csv")
+
+```
+
+
+

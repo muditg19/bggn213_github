@@ -1,0 +1,130 @@
+---
+title: "Class 5: Data Viz with"
+author: "Mudit"
+format: pdf
+---
+R has a lot of ways to makefigures and graphs in particular.
+One that comes with R out of the box is called **"base" R** - the `plot()` function
+
+```{r}
+plot(cars)
+```
+
+A very popular package in this area is called **ggplot2**
+
+Before I can use an add-on package like this, I must install it with `install.packages("ggplot2")` command/function.
+
+Then to use the package, I need to load it with a 'library(ggplot2)' call.
+
+```{r}
+library(ggplot2)
+ggplot(cars) + 
+ aes(x=speed, y = dist) +
+  geom_point()
+```
+
+For "simple" plots like this one base R code will be much shorter than ggplot code.
+
+Let's fit a model and show it on my plot
+
+```{r}
+ggplot(cars) + 
+ aes(x=speed, y = dist) +
+  geom_point() + 
+  geom_smooth()
+```
+
+ggplot work like a layer where each '+' adds a layer
+
+Every ggplot has at least 3 layers
+
+- **data** (data.frame with the numbers  and stuff you want to plot)
+- **aes**thetics (mapping of your data columns to your plot)
+- **geom**s (there are tones of these, basics are `geom_point()`, `geom_line()`, `geom_col()`)
+
+```{r}
+head(mtcars)
+```
+
+Make me a ggplot of the `mtcars` data set using `mpg` vs `disp`
+
+```{r}
+ggplot(mtcars) + 
+ aes(x=mpg, y = disp) +
+  geom_point() + 
+  geom_smooth()
+```
+
+Make me a ggplot of the `mtcars` data set using `mpg` vs `disp` 
+and set the size of the points to the `hp`
+and et the color to `am`
+
+```{r}
+
+ggplot(mtcars) + 
+ aes(x=mpg, y = disp) +
+  geom_point(aes(size = hp, col = am)) + 
+  geom_smooth()
+```
+```
+Now colour all points blue
+
+```{r}
+```{r}
+
+ggplot(mtcars) + 
+ aes(x=mpg, y = disp) +
+  geom_point(aes(size = hp), col = "blue") + 
+  geom_smooth()
+
+```
+```
+
+```{r}
+```{r}
+library(ggrepel)
+ggplot(mtcars) + 
+ aes(x=mpg, y = disp, size = hp, col = am, label = rownames(mtcars)) +
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~am) +
+  geom_text_repel()
+```
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+
+p <- ggplot(genes) + 
+    aes(x=Condition1, y=Condition2, col=State) +
+    geom_point()
+
+p + scale_colour_manual( values=c("blue","gray","red") ) +
+  labs(x = "Control (No Drug)", y = "Drug Treatment")
+
+ggsave("myplot.pdf")
+```
+
+
+
+```{r}
+# File location online
+url <- "https://raw.githubusercontent.com/jennybc/gapminder/master/inst/extdata/gapminder.tsv"
+
+gapminder <- read.delim(url)
+
+library(dplyr)
+
+gapminder_2007 <- gapminder %>% filter(year==2007)
+
+ggplot(gapminder_2007) +
+  aes(x=gdpPercap, y=lifeExp, color=continent, size=pop) +
+  geom_point(alpha=0.5)
+
+ggplot(gapminder_2007) + 
+  aes(x = gdpPercap, y = lifeExp, color = pop) +
+  geom_point(alpha=0.8)
+scale_size_area(max_size = 10)
+```
+

@@ -1,0 +1,57 @@
+---
+title: "Class6"
+author: "Mudit"
+format: pdf
+---
+
+```{r}
+#Input: function takes the PDB ID character sequence as an input
+#function plots chain A flexibility of the protein (whose pdb ID is given as an argument). 
+#output: It plots the B-factor vs residue position
+
+func_x <- function(pdbID){
+  #calling the bio3d library
+  library(bio3d)  
+  # Reading the pdb ID and assigning it to object 's'
+  s <- read.pdb(pdbID)
+  #trims the structure and include chain A's alpha carbon atoms
+  s.chainA <- trim.pdb(s, chain="A", elety="CA")
+  #extracts the B-factors from the trimmed structure
+  s.b <- s.chainA$atom$b
+  #ploting secondary structure elements against b factors
+  plotb3(s.b, sse=s.chainA, typ="l", ylab="Bfactor")
+}
+
+
+```
+```{r}
+
+#| warning: false
+#vector of pdbIDs
+seq_vec <- c("4AKE", "1AKE", "1E4Y")
+#looping over 
+sapply(seq_vec, func_x)
+```
+
+
+```{r}
+
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+```{r}
+library(ggplot)
+ggplot(mtcars, aes(mpg, disp)) + geom_point()
+```
+
