@@ -1,7 +1,7 @@
 ---
 title: "Class7: Machine Learning 1"
 author: "Mudit (PID: 911)"
-format: pdf
+format: gfm
 ---
 
 Before we get into clustering methods, let's make some sample to cluster where we know what the answer should be.
