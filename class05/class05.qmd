@@ -1,7 +1,7 @@
 ---
 title: "Class 5: Data Viz with"
 author: "Mudit"
-format: pdf
+format: gfm
 ---
 R has a lot of ways to makefigures and graphs in particular.
 One that comes with R out of the box is called **"base" R** - the `plot()` function
@@ -123,8 +123,8 @@ ggplot(gapminder_2007) +
   geom_point(alpha=0.5)
 
 ggplot(gapminder_2007) + 
-  aes(x = gdpPercap, y = lifeExp, color = pop) +
-  geom_point(alpha=0.8)
-scale_size_area(max_size = 10)
+  geom_point(aes(x = gdpPercap, y = lifeExp,
+                 size = pop), alpha=0.5) + 
+  scale_size_area(max_size = 10)
 ```
 
