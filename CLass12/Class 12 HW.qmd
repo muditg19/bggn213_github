@@ -1,0 +1,101 @@
+---
+title: "CLass 12"
+author: "Mudit"
+format: pdf
+---
+
+# Section 1. Proportion of G/G in a population
+
+Downloaded a CSV file from Ensembl < 
+https://useast.ensembl.org/Homo_sapiens/Location/View?db=core;r=17:39872367-39873367;v=rs12936231;vdb=variation;vf=959765854 >
+
+Here we read this CSV file
+
+```{r}
+mxl <- read.csv("373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs12936231.csv")
+
+head(mxl)
+```
+
+```{r}
+table(mxl$Genotype..forward.strand.)
+```
+
+```{r}
+table(mxl$Genotype..forward.strand.) / nrow(mxl) *100
+```
+
+Now let's look at a different population. I picked GBR
+
+```{r}
+gbr <- read.csv("373522-SampleGenotypes-Homo_sapiens_Variation_Sample_rs12936231.csv")
+
+head(gbr)
+```
+
+```{r}
+table(gbr$Genotype..forward.strand.)
+```
+
+
+```{r}
+round(table(gbr$Genotype..forward.strand.) / nrow(gbr) * 100, 2)
+```
+
+This variant that is associated with childhood asthma is more frequent in the GBR population in the MKL population.
+
+Let's not dig into this further
+
+## Section 4: Population Scale Analysis
+
+[HOMEWORK]
+One sample is obviously not enough to know what is happening in a population. You are
+interested in assessing genetic differences on a population scale. So, you processed about
+~230 samples and did the normalization on a genome level. Now, you want to find whether
+there is any association of the 4 asthma-associated SNPs (rs8067378...) on ORMDL3
+expression.
+ https://bioboot.github.io/bggn213_W19/class- material/rs8067378_ENSG00000172057.6.txt
+This is the final file you got (
+  column is genotype and the third column are the expression values.
+). The first column is sample name, the second
+   Open a new RMarkdown document in RStudio to answer the following two questions. Submit
+ your resulting PDF report with your working code, output and narrative text answering Q13 and
+ Q14 to GradeScope.
+ 
+How many samples do we have?
+
+```{r}
+expr <- read.table("Expression genotype results.txt")
+
+head(expr)
+```
+
+```{r}
+nrow(expr)
+```
+
+
+
+```{r}
+table(expr$geno)
+```
+
+```{r}
+tapply(expr$exp, expr$geno, median)
+```
+
+```{r}
+library(ggplot2)
+
+
+```
+
+Lets make a boxplot
+
+```{r}
+ggplot(expr) +aes(x = geno, y = exp, fill = geno) +
+  geom_boxplot(notch = TRUE)
+```
+A/A has the highest median expression level, while G/G has the lowest.
+
+difference in expression suggests that there may be an association between the genotype at this SNP and ORMDL3 expression levels, with A/A associated with higher expression and G/G with lower.

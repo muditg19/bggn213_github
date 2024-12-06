@@ -1,0 +1,239 @@
+---
+title: "Class 14: RNASeq Mini Project"
+author: "Mudit"
+format: pdf
+---
+
+## Import Data
+
+we need two things "Counts" and "MetaData" (what DESeq calls colData - as it describes the columns in Counts).
+
+```{r}
+counts <- read.csv("GSE37704_featurecounts.csv", row.names = 1)
+metadata <- read.csv("GSE37704_metadata.csv")
+```
+
+## Data CleanUp
+
+Start with a wee peak:
+
+```{r}
+head(counts)
+```
+
+```{r}
+head(metadata)
+```
+We want the columns in `counts` to match the rows in the ` metadata`.
+
+```{r}
+colnames(counts)
+```
+
+```{r}
+metadata$id
+```
+
+we can get rid of the first column in `counts` to make these match
+
+```{r}
+countData <- counts[,-1]
+head(countData)
+```
+
+```{r}
+#compare all the entries
+all(colnames(countData) == metadata$id)
+```
+
+```{r}
+all(c(T,T,T,T))
+all(c(T,T,T,F))
+```
+
+```{r}
+x <- c(T,F,T,T)
+if(all(x)){
+  cat("Me Happy")
+}else{
+  cat("me sad")
+}
+  
+```
+
+
+If the standard practice to remove any genes/transcripts that we have no data for - i.e. zero counts in all columns
+
+```{r}
+tp.keep.inds <- rowSums(countData) > 0
+cleanCounts <- countData[tp.keep.inds,]
+
+```
+## Setup for DESeup
+
+```{r}
+#/ message: false
+library(DESeq2)
+```
+
+```{r}
+#/ message: false
+dds <- DESeqDataSetFromMatrix(countData = cleanCounts, 
+                       colData = metadata,
+                       design = ~condition)
+```
+
+## DESeq
+
+```{r}
+dds = DESeq(dds)
+res = results(dds)
+```
+
+
+## Inspect Results
+
+## Data Viz
+
+```{r}
+plot( res$log2FoldChange, -log(res$padj) )
+```
+
+```{r}
+head(res)
+```
+
+## Pathway Analysis
+
+### Annotation of Genes
+
+First I need to translate my Ensemble IDs in my `res` object to Entrez and gene symbol formats.
+
+For this I will use the Annotationa DBI Package and its `mapIDs()` function
+
+```{r}
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+```
+
+```{r}
+columns(org.Hs.eg.db)
+```
+Let's map to "SYMBOLS",  "ENTREZID", "GENENAME" from our "ENSEMBL" ids
+
+```{r}
+res$genename <- mapIds(org.Hs.eg.db, 
+                      keys = rownames(res), 
+                      keytype = "ENSEMBL",
+                      column = "GENENAME")
+
+res$symbol <- mapIds(org.Hs.eg.db, 
+                      keys = rownames(res), 
+                      keytype = "ENSEMBL",
+                      column = "SYMBOL")
+
+res$entrez <- mapIds(org.Hs.eg.db, 
+                      keys = rownames(res), 
+                      keytype = "ENSEMBL",
+                      column = "ENTREZID")
+
+head(res)
+```
+
+
+```{r}
+#rownames(res)
+```
+
+Before going any further lets focus in on a subset of "top" hits 
+
+We can use as a starting point log2FC of +2/-2 and a adjusted P-value of 0.05
+
+```{r}
+top.inds <- (abs(res$log2FoldChange) > 2) & (res$padj < 0.05)
+top.inds[is.na(top.inds)] = FALSE
+```
+
+```{r}
+c(T,T,T,F) & c(T,T,F,F)
+```
+
+
+Let's save our "top genes" to a CSV file...
+
+```{r}
+top.genes <- res[top.inds,]
+write.csv(top.genes, file = "top_geneset.csv")
+```
+
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+The **gage** function wants a vector of importance as input with gene names as labels - KEGG speaks ENTREZ
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+Run gage with these values
+```{r}
+# Get the results
+keggres <- gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+```{r}
+attributes(keggres)
+```
+
+```{r}
+# Look at the first few down (less) pathways
+head(keggres$less)
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gores = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+head(gores$less)
+```
+
+TO run reactome online we need to make a little text file with a gene id per line,
+
+```{r}
+sig_genes <- res[res$padj <= 0.05 & !is.na(res$padj), "symbol"]
+print(paste("Total number of significant genes:", length(sig_genes)))
+```
+
+
+
+
+```{r}
+
+write.table(sig_genes, file="significant_genes.txt", row.names=FALSE, col.names=FALSE, quote=FALSE)
+
+```
+
+![](R-HSA-69278.png)
+![](R-HSA-5358351.png)
